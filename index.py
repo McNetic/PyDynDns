@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import web
 import re
@@ -41,7 +41,7 @@ class ddns:
 
   def isAuthorized(self, auth):
     auth = re.sub('^Basic ', '', auth)
-    self.username,password = base64.decodestring(auth).split(':')
+    self.username,password = base64.b64decode(auth).decode('ascii').split(':')
     if self.username in config.users.keys() and sha256_crypt.verify(password, config.users[self.username]['password']):
       return True
     else:
@@ -65,6 +65,9 @@ class ddns:
     web.header('Accept-Ranges:', 'none')
     if not ipaddr:
       ipaddr = web.ctx.env.get('REMOTE_ADDR')
+    else:
+      ipaddr = ipaddr.decode('ascii')
+
     parts = fqdn.split('.')
     hostname = parts[0];
     nsinfo = config.domains['.'.join(parts[1:])]
@@ -92,7 +95,7 @@ class ddns:
       elif not hostname in config.users[self.username]['hosts']:
         result.append(self.hostnameNotAllowed())
       else:
-        result.append(self.updateNic(hostname.encode('ascii', 'replace'), 'A', myip))
+        result.append(self.updateNic(hostname, 'A', myip))
     return '\n'.join(result)
 
   def GET(self):
