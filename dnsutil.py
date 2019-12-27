@@ -60,7 +60,8 @@ def update_ns(name, nsinfo, rdtype='A', ipaddr=None, origin=None, action='upd', 
                      rcode_text, action, name, origin, rdtype, ipaddr))
       raise DnsUpdateError(rcode_text)
     return response
-  except SocketError as (errno, msg):
+  except SocketError as socket_error:
+    (errno, msg) = socket_error.args
     web.debug("socket error [%s] (%s) connecting to nameserver %s" % (errno, msg, nameserver))
     raise DnsUpdateError("DNSServerSocketTimeout")
   except ConnectionRefusedError:
